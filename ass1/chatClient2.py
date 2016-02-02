@@ -33,44 +33,47 @@ def getUserHandle:
 	validHandle = false
 
 	while(!validHandle)
-		userHandle = raw_input("Enter a username 10 characters or less: ")
+		userHandle = raw_input('Enter a username 10 characters or less: ')
 		if not userHandle:	
-			print "You entered nothing; try again."
+			print 'You entered nothing; try again.'
 
 		elif len(userHandle) > 10
-			print "Your name is too long; try again."
+			print 'Your name is too long; try again.'
 		
 		# User handle is valild
 		else:	
-			"Thanks " + userHandle + "!"
+			'Thanks ' + userHandle + '!'
 			validHandle = true
 
 	return userHandle
 
-# This function receives user input and sends it to the server
-# It also quits the program
-def messageServer(userHandle):
-# while !quit
-	# read input
-		message = raw_input("userHandle> ")
-		clientSocket.send(message)
-		# send input, to server
-		# if "\quit", terminate program
-			# clientSocket.close()
+# Sequentially talks with server and quits program when instructed
+def chatting(userHandle):
+	quit = false
+
+	# May not need to use quit in order to close program
+	while !quit
+	
+		# read input and send
+		clientMessage = raw_input('userHandle> ')
+		if clientMessage = '\quit'
+			quit = true
+			clientSocket.close()
 			sys.exit()
+		else
+			clientSocket.send(clientMessage)
+
+		# wait for server message
+		serverMessage = clientSocket.recv(1024)
+		print 'From Server: ' + serverMessage
+
+		# while loop resets to send another message to the server
 
 
-	# await messages (from server)
-		### modifiedSentence = clientSocket.recv(1024)
-		### print ‘From Server:’, modifiedSentence
-
-		# append to screen
-		# go to stop of while
-
-def main:
+if __name__ == '__main__':
 	clientStart()
 	userHandle = getUserHandle()
-	messageServer(userHandle)
+	chatting(userHandle)
 
 
 

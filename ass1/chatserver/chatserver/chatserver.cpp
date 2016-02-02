@@ -1,20 +1,4 @@
-//
-//  main.cpp
-//  chatserve
-//
-//  Created by Dane Schoonover on 1/27/16.
-//  Copyright © 2016 dane. All rights reserved.
-//
-
-//
-//  main.cpp
-//  chatserve
-//
-//  Created by Dane Schoonover on 1/27/16.
-//  Copyright © 2016 dane. All rights reserved.
-
 #include <iostream>
-#include <cstdlib>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -34,141 +18,156 @@ void clearMessages();
 
 
 struct sockaddr_in servaddr;
-int serverSocket, connfd;
+int listenfd, connfd;
 int closeFlag = 0;
-char servName[11] = "ServerSays";
+char servName[6] = "Kabir";
 char recMessage[501];
 char message[501];
 
 /*
- MAIN FUNCTION
- This function initializes most actions. It carries out the setup
- of the socket, listening, etc.
+MAIN FUNCTION
+This function initializes most actions. It carries out the setup
+of the socket, listening, etc.
  */
-int main(int argc, char ** argv){
-    int portNum;
-    
-    // if ((commence = checkArg(argc, argv)) == 1)
-    //     return 1;
+int main(int argc, char ** argv)
+{
+  int commence; // Here we check if we have a port number to work with
+  int portNum;  
 
-    portNum = atoi(argv[1]);
-    createSocket(portNum);
-    bindSocket();
-    listenSocket();
-    acceptConn();
-    
-    return 0;
+if((commence = checkArg(argc, argv))==1)
+    {
+      return 1;
+    }
+ portNum = atoi(argv[1]);
+  createSocket(portNum);
+  bindSocket();
+  listenSocket();
+  acceptConn();
+
+  return 0;
 }
 
 /*
- CHECK ARGUMENTS
- This function checks that there is one argument, the port number.
+CHECK ARGUMENTS
+This function checks that there is one argument, the port number.
  */
-// int checkArg(int argc, char** argv){
-//     if (argc != 2){
-//         cerr << "This program requires 1 argument, the port number." << endl;
-//         return 1;
-//     }
-//     return 0;
-// }
-
-/*
- CREATE SOCKET
- This function does socket initialization.
- */
-void createSocket(int portNum){
-    
-    // create the server socket
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-    
-    // memset(&servaddr, '0', sizeof(servaddr));
-
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons(portNum);
+int checkArg(int argc, char** argv)
+{
+  if(argc!=2)
+    {
+      cerr << "This program requires 1 argument, the port number." << endl;
+      return 1;
+    }
+  return 0;
 }
 
 /*
- BIND SOCKET
- This binds the socket.
+CREATE SOCKET
+This function does socket initialization.
  */
-void bindSocket(){
-    bind(serverSocket, (struct sockaddr*)&servaddr, sizeof(servaddr));
+void createSocket(int portNum)
+{
+  listenfd = socket(AF_INET, SOCK_STREAM, 0);
+  memset(&servaddr, '0', sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(portNum); 
 }
 
 /*
- LISTEN SOCKET
- This listens in.
+BIND SOCKET
+This binds the socket.
  */
-void listenSocket(){
-    listen(serverSocket, 10);
+void bindSocket()
+{
+  bind(listenfd, (struct sockaddr*)&servaddr, sizeof(servaddr)); 
 }
 
 /*
- ACCEPT CONNECTION
- This function accepts connections and allows for communication.
+LISTEN SOCKET
+This listens in.
  */
-void acceptConn(){
-    while (1){
-        closeFlag = 0;
-        connfd = accept(serverSocket, (struct sockaddr*)NULL, NULL);
-        cout << "Client has connected. Awaiting message... " << endl;
-        send(connfd, servName, strlen(servName), 0);
-        
-        while (closeFlag == 0){
-            clearMessages();
-            
-            receiveMessage(connfd);
-            
-            sendMessage(connfd);
-            
-            
-            if (closeFlag == 1){
-                close(connfd);
-                exit(1);
-            }
-        } 
+void listenSocket()
+{
+  listen(listenfd, 10); 
+}
+
+/*
+ACCEPT CONNECTION
+This function accepts connections and allows for communication.
+ */
+void acceptConn()
+{
+
+  while(1)
+    {
+      closeFlag = 0;
+      connfd = accept(listenfd, (struct sockaddr*)NULL, NULL); 
+      std::cout << "Client has connected. Awaiting message... " << endl;
+      send(connfd,servName,strlen(servName),0);
+
+      while(closeFlag==0)
+    {
+      clearMessages();
+      
+      receiveMessage(connfd);
+      
+      sendMessage(connfd);
+      
+
+      if(closeFlag==1)
+    {
+      close(connfd);
+    }
+    }
+
     }
 }
 
 /*
- RECEIVE MESSAGE
- This function allows the server to receive messages from the client.
+RECEIVE MESSAGE
+This function allows the server to receive messages from the client.
  */
-void receiveMessage(int connfd){
+void receiveMessage(int connfd)
+{
     recv(connfd, recMessage, 500, 0);
-    if (strcmp(recMessage, "\\quit") == 0){
-        cout << "Client has disconnected." << endl;
+    if (strcmp(recMessage, "\\quit") == 0)
+    {
+        std::cout << "Client has disconnected." << endl;
         closeFlag = 1;
     }
 }
 
 /*
- SEND MESSAGE
- This function allows the server to send a message to the client.
+SEND MESSAGE
+This function allows the server to send a message to the client. 
  */
-void sendMessage(int connfd){
-    if (closeFlag == 0){
-        cout << "ClientSays> " << recMessage << endl;
-        cout << servName << "> ";
-        cin.getline(message, 81);
-        
+void sendMessage(int connfd)
+{
+    if (closeFlag == 0)
+    {
+        std::cout << "Client> " << recMessage << endl;
+        std::cout << servName << "> ";
+        std::cin.getline(message, 81);
+
     }
-    if (strcmp(message, "\\quit") == 0){
-        cout << "You have chosen to close this connection..." << endl;
+    if (strcmp(message, "\\quit") == 0)
+    {
+        std::cout << "You have chosen to close this connection..." << endl;
         closeFlag = 1;
     }
-    
-    send(connfd, message, strlen(message), 0);   
-    
+
+
+
+    send(connfd, message, strlen(message), 0);
 }
 
 /*
- CLEAR MESSAGES
- This clears the memory of the sending and receiving message.
+CLEAR MESSAGES
+This clears the memory of the sending and receiving message.
  */
-void clearMessages(){
+void clearMessages()
+{
     memset(&message[0], 0, sizeof(message));
     memset(&recMessage[0], 0, sizeof(recMessage));
 }

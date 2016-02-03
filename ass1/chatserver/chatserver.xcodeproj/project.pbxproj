@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		35B9B2F01C59AD17001F8356 /* chatserver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35B9B2EF1C59AD17001F8356 /* chatserver.cpp */; };
+		3564F6F01C614FAB00798945 /* chatServer2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3564F6EE1C614FAB00798945 /* chatServer2.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +23,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3564F6EE1C614FAB00798945 /* chatServer2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = chatServer2.cpp; sourceTree = "<group>"; };
 		35B9B2EC1C59AD17001F8356 /* chatserver */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = chatserver; sourceTree = BUILT_PRODUCTS_DIR; };
-		35B9B2EF1C59AD17001F8356 /* chatserver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = chatserver.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,7 +57,7 @@
 		35B9B2EE1C59AD17001F8356 /* chatserver */ = {
 			isa = PBXGroup;
 			children = (
-				35B9B2EF1C59AD17001F8356 /* chatserver.cpp */,
+				3564F6EE1C614FAB00798945 /* chatServer2.cpp */,
 			);
 			path = chatserver;
 			sourceTree = "<group>";
@@ -118,7 +118,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				35B9B2F01C59AD17001F8356 /* chatserver.cpp in Sources */,
+				3564F6F01C614FAB00798945 /* chatServer2.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,6 +237,7 @@
 				35B9B2F51C59AD17001F8356 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

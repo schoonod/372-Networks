@@ -1,64 +1,95 @@
-# 
-# C372
-# kangk@onid.oregonstate.edu
-# 10/28/14
-# Assignment 1
-# File: chatclient.py
-# Summary: Chats with chatserve.cpp. First it creates a connection with listening server, and then it can begin interchange. Client messages first, then server.
-
-# General imports
 import getopt
 import os
-import sys
-# import signal
+import sys	# for sys.argv (command line input)
 
-#Program specific imports
 from socket import * 
 
-def client():
-    # checks if valid number of args were entered
-    checkArgs();
-    
-    # create the TCP socket for sever 
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.connect((sys.argv[1],int(sys.argv[2])))  
+def clientStart():
+	# start chatclient by specifying hostname/port
+	# sys.argv[1] and [2] are serverName and serverPort
+	# clientSocket is our socket variable name
+	clientSocket = socket(AF_INET, SOCK_STREAM)
+	clientSocket.connect((sys.argv[1], int(sys.argv[2])))
 
-    name = sock.recv(4096)    
-    var = 1
-    while var == 1:
-        # Receive and send prompt
-        msgOut(sock)
+	# Receive server handle upon connection
+	serverName = clientSocket.recv(4096)
 
-        message = msgIn(sock)
-        if message == "\quit":
-            print "The server has quit communication.\n"
-            sys.exit()
-        else:
-            print name + "> " + message
-    sock.close()
-# This function receives the name of the server.                
-def getName(s):
-    name = s.recv(4096)
-    return name
+	return (clientSocket, serverName)
 
+# Gets username and provides input validation for length
+# Returns username
+def getUserHandle():
+	# flag to break the while loop
+	validHandle = False
 
-def checkArgs():
-    if len(sys.argv) != 3:
-        print "You must use the following syntax: python chatclient.py <host> <port>"
-        sys.exit()
+	while not validHandle:
+		userHandle = raw_input('Enter a username 10 characters or less: ')
+		if not userHandle:	
+			print 'You entered nothing; try again.'
 
-# Summary: Returns messages
-def msgIn(s):
-    message = str(s.recv(4096)) #recommended buff size
-    return message
-# Summary: This function sends messages.
-def msgOut(s):
-    sendMsg = raw_input("Client> ")
-    s.send(sendMsg)
-    if sendMsg == "\quit":
-        s.close
-        sys.exit()
+		elif len(userHandle) > 10:
+			print 'Your name is too long; try again.'
+		
+		# User handle is valild
+		else:	
+			'Thanks ' + userHandle + '!'
+			# send userHandle??
+			# clientSocket.send(userHandle);
+			validHandle = True
+
+	return userHandle
+
+# Sequentially talks with server and quits program when instructed
+def chatting(clientSocket, serverName, userHandle):
+	quit = False
+
+	# May not need to use quit in order to close program
+	while not quit:
+	
+		# read input and send
+		clientMessage = raw_input(userHandle + '> ')
+		if clientMessage == '\quit':
+			quit = True
+			print "Bye bye"
+			clientSocket.close()
+			sys.exit()
+		else:
+			clientSocket.send(clientMessage)
+			sys.stdout.write(serverName + '> ')
+
+		# wait for server message
+		serverMessage = str(clientSocket.recv(1024))
+		print serverMessage
+
+		# while loop resets to send another message to the server
 
 
 if __name__ == '__main__':
-    client()
+	(clientSocket, serverName) = clientStart()
+	userHandle = getUserHandle()
+	chatting(clientSocket, serverName, userHandle)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

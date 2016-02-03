@@ -12,8 +12,7 @@ using namespace std;
 //----------------------------------------------
 // Prototypes
 //----------------------------------------------
-// Get port input by use upon program start
-int getPort(char ** argv);
+
 
 // Returns the handle for the server
 string setHandle();
@@ -21,14 +20,8 @@ string setHandle();
 // Returns serverSocket; serverSocket = socket(AF_INET,SOCK_STREAM)
 int setSocket();
 
-// Set socket address info
-// Takes port
-// Returns address info
-struct sockaddr_in getIpInfo(int port);             // function SETIPINFO of struct type SOCKADDR_IN of data type STRUCT
-
-// Socket is bound to a local address; serverSocket.bind((‘’,serverPort))
-// Takes serverSocket, ip info, size of ip info
-void bindSocket(int, struct sockaddr_in*, int);
+// Takes socket and port
+void bindSocket(int socket, int port);             
 
 // Socket is listening; serverSocket.listen(1)
 // Takes serveSocket
@@ -41,41 +34,37 @@ int acceptConnection(int, string);
 
 // Receives a message from the client
 // Takes a chatSocket
-// Returns true if message received, returns false if client quit
-int receiveMessage(int);
+void receiveMessage(int);
 
 // Send a message to the client
 // Takes a chatSocket and serverHandle
-// Returns true if server sends message, returns false if server quits
-int sendMessage(int, string);
+void sendMessage(int, string);
 
 
 
 //----------------------------------------------
 // Main
 //----------------------------------------------
+
+
 int main(int argc, char ** argv){
     
-    int port = getPort(argv);
+    int port = atoi(argv[1]);
     string serverHandle = setHandle();
     
     int serverSocket = setSocket();
-    struct sockaddr_in ipInfo = getIpInfo(port);    // instance IPINFO of struct type SOCKADDR_IN of data type STRUCT
     
-    bindSocket(serverSocket, &ipInfo, sizeof(ipInfo));
+    bindSocket(serverSocket, port);
     
     listenSocket(serverSocket);
     
     // Loop forever
     while(1){
-        int chatSocket = acceptConnection(serverSocket, serverHandle);
-        
-        if(!receiveMessage(chatSocket))
-            close(chatSocket);
-        if(!sendMessage(chatSocket, serverHandle))
-            close(chatSocket);
+        int chatSocket = acceptConnection(serverSocket, serverHandle);    
+        receiveMessage(chatSocket);
+        sendMessage(chatSocket, serverHandle);
     }
-    
+
     return 0;
 }
 
@@ -85,13 +74,7 @@ int main(int argc, char ** argv){
 // Functions
 //----------------------------------------------
 
-// Get port/Set Handle
-int getPort(char ** argv){
-    int port = atoi(argv[1]);
-    return port;
-}
-
-
+// Get Handle
 string setHandle(){
     string handle = "Server";
     return handle;
@@ -104,21 +87,15 @@ int setSocket(){
     return serverSocket;
 }
 
-
-struct sockaddr_in getIpInfo(int port){
+void bindSocket(int socket, int port){
     struct sockaddr_in ipInfo;
+    memset(&ipInfo, '0', sizeof(ipInfo));
     ipInfo.sin_family = AF_INET;
-    ipInfo.sin_addr.s_addr = htonl(INADDR_ANY);
     ipInfo.sin_port = htons(port);
-    
-    return ipInfo;
+    ipInfo.sin_addr.s_addr = htonl(INADDR_ANY);
+    bind(socket, (struct sockaddr*)&ipInfo, sizeof(ipInfo));
 }
 
-// MIGHT HAVE SOME ISSUES WITH THE STRUCT POINT HERE
-void bindSocket(int socket, struct sockaddr_in* &ipInfo, int size){
-    bind(socket, (struct sockaddr_in*)&ipInfo, size);
-
-}
 
 // Listen and open a chat socket
 void listenSocket(int socket){
@@ -129,7 +106,7 @@ void listenSocket(int socket){
 int acceptConnection(int socket, string serverHandle){
     // New connection socket does not need/use the peer socket so NULL, NULL
     // is used for addr and sizeof(addr)
-    int newConnectionSocket = accept(socket, NULL, NULL);
+    int newConnectionSocket = accept(socket, (struct sockaddr*)NULL, NULL);
     cout << "Client connected" << endl;
     send(newConnectionSocket, &serverHandle, serverHandle.length(),0);
     return newConnectionSocket;
@@ -137,33 +114,30 @@ int acceptConnection(int socket, string serverHandle){
 
 
 // Receive/Send messages
-int receiveMessage(int chatSocket){
-    string newMessage;
-    recv(chatSocket, &newMessage, 500, 0);
-    if(newMessage.compare("\\quit") == 0){
+void receiveMessage(int chatSocket){
+    char newMessage[501];
+    recv(chatSocket, newMessage, 500, 0);
+    if(strcmp(newMessage, "\\quit") == 0){
         cout << "Client disconnected" << endl;
-        return 0;
-    }
-    else {
+        close(chatSocket);
+     }
+
+    else 
         cout << newMessage << endl;
-        return 1;
-    }
 };
 
-int sendMessage(int chatSocket, string serverHandle){
-    string newMessage;
+void sendMessage(int chatSocket, string serverHandle){
+    char newMessage[501];
     
-    getline(cin, newMessage);
+    cin.getline(newMessage, 501);
     
-    if(newMessage.compare("\\quit") == 0){
+    if(strcmp(newMessage, "\\quit") == 0){
         cout << "Server disconnected" << endl;
-        return 0;
+        close(chatSocket);
     }
     
-    else {
+    else
         cout << serverHandle << "> " << newMessage << endl;
-        return 1;
-    }
 };
 
 

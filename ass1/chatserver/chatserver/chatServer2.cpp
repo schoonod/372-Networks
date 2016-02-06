@@ -15,7 +15,7 @@ using namespace std;
 
 
 // Returns the handle for the server
-string setHandle();
+// string setHandle();
 
 // Returns serverSocket; serverSocket = socket(AF_INET,SOCK_STREAM)
 int setSocket();
@@ -30,7 +30,7 @@ void listenSocket(int);
 // Accepts a connection and create the new chat socket
 // Takes serverSocket and serverHandle
 // Returns a chatSocket
-int acceptConnection(int, string);
+int acceptConnection(int);
 
 // Receives a message from the client
 // Takes a chatSocket
@@ -38,10 +38,10 @@ void receiveMessage(int);
 
 // Send a message to the client
 // Takes a chatSocket and serverHandle
-void sendMessage(int, string);
+void sendMessage(int);
 
 
-
+char serverHandle[7] = "Server";
 //----------------------------------------------
 // Main
 //----------------------------------------------
@@ -50,7 +50,8 @@ void sendMessage(int, string);
 int main(int argc, char ** argv){
     
     int port = atoi(argv[1]);
-    string serverHandle = setHandle();
+    // string serverHandle = setHandle();
+
     
     int serverSocket = setSocket();
     
@@ -58,11 +59,16 @@ int main(int argc, char ** argv){
     
     listenSocket(serverSocket);
     
+    int chatSocket = acceptConnection(serverSocket);    
+    
     // Loop forever
     while(1){
-        int chatSocket = acceptConnection(serverSocket, serverHandle);    
         receiveMessage(chatSocket);
-        sendMessage(chatSocket, serverHandle);
+
+        if (!chatSocket)
+            break;
+
+        sendMessage(chatSocket);
     }
 
     return 0;
@@ -75,10 +81,10 @@ int main(int argc, char ** argv){
 //----------------------------------------------
 
 // Get Handle
-string setHandle(){
-    string handle = "Server";
-    return handle;
-}
+// string setHandle(){
+//     string handle = "Server";
+//     return handle;
+// }
 
 
 // Create Socket
@@ -103,19 +109,20 @@ void listenSocket(int socket){
     cout << "Server is listening" << endl;
 };
 
-int acceptConnection(int socket, string serverHandle){
+int acceptConnection(int socket){
     // New connection socket does not need/use the peer socket so NULL, NULL
     // is used for addr and sizeof(addr)
     int newConnectionSocket = accept(socket, (struct sockaddr*)NULL, NULL);
-    cout << "Client connected" << endl;
-    send(newConnectionSocket, &serverHandle, serverHandle.length(),0);
+    cout << "Client connected, awaiting message." << endl;
+    send(newConnectionSocket, serverHandle, strlen(serverHandle),0);
     return newConnectionSocket;
 };
 
 
 // Receive/Send messages
 void receiveMessage(int chatSocket){
-    char newMessage[501];
+    char newMessage[500];
+    memset(&newMessage[0], 0, sizeof(newMessage));
     recv(chatSocket, newMessage, 500, 0);
     if(strcmp(newMessage, "\\quit") == 0){
         cout << "Client disconnected" << endl;
@@ -124,21 +131,27 @@ void receiveMessage(int chatSocket){
 
     else 
         cout << newMessage << endl;
+
 };
 
-void sendMessage(int chatSocket, string serverHandle){
-    char newMessage[501];
-    
-    cin.getline(newMessage, 501);
+void sendMessage(int chatSocket){
+    char newMessage[500];
+    memset(&newMessage[0], 0, sizeof(newMessage));
+    cin.getline(newMessage, 500);
     
     if(strcmp(newMessage, "\\quit") == 0){
         cout << "Server disconnected" << endl;
         close(chatSocket);
     }
     
-    else
-        cout << serverHandle << "> " << newMessage << endl;
+    else {
+        send(chatSocket, newMessage, strlen(newMessage), 0);
+
+    }
+
 };
+
+
 
 
 

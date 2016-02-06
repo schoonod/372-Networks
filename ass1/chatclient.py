@@ -12,7 +12,7 @@ def clientStart():
 	clientSocket.connect((sys.argv[1], int(sys.argv[2])))
 
 	# Receive server handle upon connection
-	serverName = clientSocket.recv(4096)
+	serverName = clientSocket.recv(501)
 
 	return (clientSocket, serverName)
 
@@ -54,11 +54,11 @@ def chatting(clientSocket, serverName, userHandle):
 			clientSocket.close()
 			sys.exit()
 		else:
-			clientSocket.send(clientMessage)
-			sys.stdout.write(serverName + '> ')
+			clientSocket.send(userHandle + '> ' + clientMessage)
 
 		# wait for server message
 		serverMessage = str(clientSocket.recv(1024))
+		sys.stdout.write(serverName + '> ')
 		print serverMessage
 
 		# while loop resets to send another message to the server

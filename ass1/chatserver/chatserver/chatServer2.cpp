@@ -13,10 +13,6 @@ using namespace std;
 // Prototypes
 //----------------------------------------------
 
-
-// Returns the handle for the server
-// string setHandle();
-
 // Returns serverSocket; serverSocket = socket(AF_INET,SOCK_STREAM)
 int setSocket();
 
@@ -28,7 +24,7 @@ void bindSocket(int socket, int port);
 void listenSocket(int);
 
 // Accepts a connection and create the new chat socket
-// Takes serverSocket and serverHandle
+// Takes serverSocket
 // Returns a chatSocket
 int acceptConnection(int);
 
@@ -37,11 +33,10 @@ int acceptConnection(int);
 void receiveMessage(int);
 
 // Send a message to the client
-// Takes a chatSocket and serverHandle
+// Takes a chatSocket
 void sendMessage(int);
 
 
-char serverHandle[7] = "Server";
 //----------------------------------------------
 // Main
 //----------------------------------------------
@@ -50,8 +45,6 @@ char serverHandle[7] = "Server";
 int main(int argc, char ** argv){
     
     int port = atoi(argv[1]);
-    // string serverHandle = setHandle();
-
     
     int serverSocket = setSocket();
     
@@ -80,13 +73,6 @@ int main(int argc, char ** argv){
 // Functions
 //----------------------------------------------
 
-// Get Handle
-// string setHandle(){
-//     string handle = "Server";
-//     return handle;
-// }
-
-
 // Create Socket
 int setSocket(){
     int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -110,6 +96,7 @@ void listenSocket(int socket){
 };
 
 int acceptConnection(int socket){
+    char serverHandle[7] = "Server";
     // New connection socket does not need/use the peer socket so NULL, NULL
     // is used for addr and sizeof(addr)
     int newConnectionSocket = accept(socket, (struct sockaddr*)NULL, NULL);

@@ -1,7 +1,17 @@
+# Dane Schoonover
+# CS372
+# Project 1
+# Description: This program is a chat client that connects to a chat server
+# and exchanges messages until a host closes the connection
+# This program was tested on FLIP
+
 import getopt
 import os
-import sys	# for sys.argv (command line input)
 
+# for sys.argv (command line input)
+import sys	
+
+# socket api
 from socket import * 
 
 def clientStart():
@@ -49,6 +59,7 @@ def chatting(clientSocket, serverName, userHandle):
 		# read input and send
 		clientMessage = raw_input(userHandle + '> ')
 		if clientMessage == '\quit':
+			clientSocket.send(clientMessage)
 			quit = True
 			print "Bye bye"
 			clientSocket.close()
@@ -58,38 +69,19 @@ def chatting(clientSocket, serverName, userHandle):
 
 		# wait for server message
 		serverMessage = str(clientSocket.recv(1024))
-		sys.stdout.write(serverName + '> ')
-		print serverMessage
-
-		# while loop resets to send another message to the server
+		if serverMessage == "\quit":
+			quit = True
+			print "The server has quit.\n"
+			sys.exit()
+		else:
+			sys.stdout.write(serverName + '> ')
+			print serverMessage
+	
 
 
 if __name__ == '__main__':
 	(clientSocket, serverName) = clientStart()
 	userHandle = getUserHandle()
 	chatting(clientSocket, serverName, userHandle)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

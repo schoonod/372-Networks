@@ -237,6 +237,7 @@
 				35B11DB11C87541600C13EAA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -125,9 +125,9 @@ char* dirFileCommand(char* command){
     char* str = command;
     char* dirFile;
     
+    // This gives us either -l or -g
     dirFile = strtok(str, " ");
-    // dirFile now tells us if this is -l or -g
-    
+ 
     return dirFile;
 }
 
@@ -160,12 +160,10 @@ void listDirectory(int ftpControlSocket, char* command){
     int ftpDataSocket = 0;
     
     
-    char *temp = command;
     char *tempDP;
     
-    // Find the filename
-    temp = strchr(temp, ' ');
-    tempDP = temp++;                    // DOES THIS NULL TERMINATE?
+    tempDP = strtok(command, " ");  // This gives us -l
+    tempDP = strtok(NULL, " ");     // This gives us the dataport
     
     clientDataPort = atoi(tempDP);
 
@@ -187,19 +185,20 @@ void transferFile(int ftpControlSocket, char* command){
     int clientDataPort = 0;
     int ftpDataSocket = 0;
     
-    // COMMANDS INCOMING FROM PYTHON CLIENT ARE: -g <filename.txt> <datasocket>
-    char *temp = command;
-    char *tempFN;   // filename
+    // Commands incoming from pythong client are: -g <filename.txt> <datasocket>
+    char *str = command;
+    char *temp;
+    char *tempFN;   // filenamec
     char *tempDP;   // dataport
     
+    
     // Find the filename
-    temp = strchr(temp, ' ');
-    temp++;
+    temp = strtok(str, " ");        // this gives us tokens, and also 'g'
+    
+    temp = strtok(NULL, " ");       // this gives us 'filename.txt'
     tempFN = temp;
-
-    // Find the datasocket
-    temp = strchr(temp, ' ');
-    temp++;
+    
+    temp = strtok(NULL, " ");       // this gives us 'dataport'
     tempDP = temp;
     
     clientDataPort = atoi(tempDP);
@@ -208,8 +207,49 @@ void transferFile(int ftpControlSocket, char* command){
     ftpDataSocket = createDataSocket(ftpControlSocket, clientDataPort);
     
     
-    // Transfer files
- 
+    // TRANSFER FILE
+    // http://www.cplusplus.com/reference/cstdio/fread/ this link tells us
+    // to do magical things with c++ to read a file
+    
+    FILE * pFile;
+    long lSize;
+    char * buffer;
+    size_t result;
+    
+    pFile = fopen ( "myfile.bin" , "rb" );
+    if (pFile==NULL) {
+        fputs ("File error",stderr);
+        exit (1);
+    }
+    
+    // obtain file size:
+    fseek (pFile , 0 , SEEK_END);
+    lSize = ftell (pFile);
+    rewind (pFile);
+    
+    // allocate memory to contain the whole file:
+    buffer = (char*) malloc (sizeof(char)*lSize);
+    if (buffer == NULL) {
+        fputs ("Memory error",stderr);
+        exit (2);
+    }
+    
+    // copy the file into the buffer:
+    result = fread(buffer,1,lSize,pFile);
+    if (result != lSize) {
+        fputs ("Reading error",stderr);
+        exit (3);
+    }
+    
+    // The whole file is now loaded in the memory buffer
+    // Send the file
+    send(ftpDataSocket, buffer, lSize, 0);
+    
+    
+    // terminate
+    fclose (pFile);
+    free (buffer);
+    close(ftpDataSocket);
 };
 // -------------------------------------------------------------------------------------
 

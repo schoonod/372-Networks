@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3556D4241C8B58CF0007A298 /* ftserve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3556D4231C8B58CF0007A298 /* ftserve.cpp */; };
+		35062E321C8B8FB300241BCF /* ftserve.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35062E311C8B8FB300241BCF /* ftserve.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,7 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3556D4231C8B58CF0007A298 /* ftserve.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ftserve.cpp; sourceTree = "<group>"; };
+		35062E311C8B8FB300241BCF /* ftserve.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ftserve.cpp; sourceTree = "<group>"; };
 		35B11DA81C87541600C13EAA /* ftserve */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ftserve; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -57,7 +57,7 @@
 		35B11DAA1C87541600C13EAA /* ftserve */ = {
 			isa = PBXGroup;
 			children = (
-				3556D4231C8B58CF0007A298 /* ftserve.cpp */,
+				35062E311C8B8FB300241BCF /* ftserve.cpp */,
 			);
 			path = ftserve;
 			sourceTree = "<group>";
@@ -118,7 +118,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3556D4241C8B58CF0007A298 /* ftserve.cpp in Sources */,
+				35062E321C8B8FB300241BCF /* ftserve.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

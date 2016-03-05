@@ -57,6 +57,7 @@ int main(int argc, const char * argv[]) {
 
     // Setup socket
     int port = atoi(argv[1]);
+    cout << "Port number " << port <<  " received." << endl;
     int listeningSocket = startup(port);
     cout << "Server started" << endl;
     
@@ -69,7 +70,7 @@ int main(int argc, const char * argv[]) {
 
 
 //--------------------------------------------------------------------------------------
-// MAIN FUNCTIONS ----------------------------------------------------------------------
+// MAIN FUNCTION DEFINITIONS -----------------------------------------------------------
 //--------------------------------------------------------------------------------------
 int startup(int port){
     // Create a listening Socket
@@ -80,6 +81,7 @@ int startup(int port){
 }
 
 void handleRequest(int listeningSocket, int port){
+    char list[] = "-l";
     while(1) {
         
         // Create a socket with each client
@@ -91,7 +93,7 @@ void handleRequest(int listeningSocket, int port){
         char* dirFile = dirFileCommand(command);
         
         // Send data based on command
-        if (strcmp(dirFile,"-l")==0)
+        if (strcmp(dirFile,list)==0)
             listDirectory(ftpControlSocket, command);
         else
             transferFile(ftpControlSocket, command);
@@ -160,12 +162,12 @@ void listDirectory(int ftpControlSocket, char* command){
     int ftpDataSocket = 0;
     
     
-    char *tempDP;
+    char *dataport;
     
-    tempDP = strtok(command, " ");  // This gives us -l
-    tempDP = strtok(NULL, " ");     // This gives us the dataport
+    dataport = strtok(command, " ");  // This gives us -l
+    dataport = strtok(NULL, " ");     // This gives us the dataport
     
-    clientDataPort = atoi(tempDP);
+    clientDataPort = atoi(dataport);
 
     // Returns clientDataPort
     ftpDataSocket = createDataSocket(ftpControlSocket, clientDataPort);
@@ -188,20 +190,20 @@ void transferFile(int ftpControlSocket, char* command){
     // Commands incoming from pythong client are: -g <filename.txt> <datasocket>
     char *str = command;
     char *temp;
-    char *tempFN;   // filenamec
-    char *tempDP;   // dataport
+    char *filename;   // filenamec
+    char *dataport;   // dataport
     
     
     // Find the filename
     temp = strtok(str, " ");        // this gives us tokens, and also 'g'
     
     temp = strtok(NULL, " ");       // this gives us 'filename.txt'
-    tempFN = temp;
+    filename = temp;
     
     temp = strtok(NULL, " ");       // this gives us 'dataport'
-    tempDP = temp;
+    dataport = temp;
     
-    clientDataPort = atoi(tempDP);
+    clientDataPort = atoi(dataport);
     
     // Returns clientDataPort
     ftpDataSocket = createDataSocket(ftpControlSocket, clientDataPort);
@@ -216,7 +218,7 @@ void transferFile(int ftpControlSocket, char* command){
     char * buffer;
     size_t result;
     
-    pFile = fopen ( "myfile.bin" , "rb" );
+    pFile = fopen (filename , "rb");
     if (pFile==NULL) {
         fputs ("File error",stderr);
         exit (1);

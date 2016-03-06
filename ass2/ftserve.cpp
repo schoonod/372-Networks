@@ -65,7 +65,7 @@ int main(int argc, const char * argv[]) {
     handleRequest(listeningSocket, port);
     
     return 0;
-}
+};
 // -------------------------------------------------------------------------------------
 
 
@@ -78,7 +78,7 @@ int startup(int port){
     bindSocket(listeningSocket, port);
     listenSocket(listeningSocket);
     return listeningSocket;
-}
+};
 
 void handleRequest(int listeningSocket, int port){
     char list[] = "-l";
@@ -100,7 +100,7 @@ void handleRequest(int listeningSocket, int port){
         
         free((char*)command);
     }
-}
+};
 //--------------------------------------------------------------------------------------
 
 
@@ -131,7 +131,7 @@ char* dirFileCommand(char* command){
     dirFile = strtok(str, " ");
  
     return dirFile;
-}
+};
 
 int createDataSocket(int ftpControlSocket, int ftpDataPort){
     // New data socket for FTP
@@ -264,7 +264,7 @@ void transferFile(int ftpControlSocket, char* command){
 int setSocket(){
     int listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
     return listeningSocket;
-}
+};
 
 // Bind server address info to socket
 void bindSocket(int socket, int port){
@@ -274,7 +274,7 @@ void bindSocket(int socket, int port){
     ipInfo.sin_port = htons(port);
     ipInfo.sin_addr.s_addr = htonl(INADDR_ANY);
     bind(socket, (struct sockaddr*)&ipInfo, sizeof(ipInfo));
-}
+};
 
 // Listen and open a chat socket
 void listenSocket(int socket){

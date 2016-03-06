@@ -6,6 +6,7 @@
 import getopt
 import os
 
+
 # For sys.argv (command line input)
 import sys	
 
@@ -30,6 +31,7 @@ def validateParameters(params):
 def clientStart(serverName, serverPort):
 	controlSocket = socket(AF_INET, SOCK_STREAM)
 	controlSocket.connect((serverName, int(serverPort)))
+	print "clientStart function finished"
 	return (controlSocket)
 
 def printDirectory(controlSocket):
@@ -41,8 +43,8 @@ def printDirectory(controlSocket):
 def receiveFile(controlSocket, fileName):
 	(dataSocket, address) = controlSocket.accept()
 	fileData = dataSocket.recv(2048)
-	file = open(fileName, 'w')
-	file.write(fileData)
+	fileName = open(fileName, 'w')
+	fileName.write(fileData)
 	dataSocket.close()
 	
 def dirRequest(controlSocket, command, dataPort):
@@ -69,20 +71,25 @@ if __name__ == '__main__':
 
 	controlSocket = clientStart(serverName, serverPort)
 
+	print len(sys.argv)
+
 
 	command = sys.argv[3]
 	
 	if len(sys.argv) == 5:
-		dataPort = sys.argv[4]
-		controlSocket.bind(('localhost', dataPort))
-		controlSocket.listen(0)
+		dataPort = int(sys.argv[4])
+		print "Dataport is " + str(dataPort)
+		print "Dataport type is " + str(type(dataPort))
+		print type(dataPort)
+		controlSocket.bind((serverName, dataPort))
+		controlSocket.listen(1)
 		dirRequest(controlSocket, command, dataPort)
 
 	else:
 		fileName = sys.argv[4]
-		dataPort = sys.argv[5]
-		controlSocket.bind(('localhost', dataPort))
-		controlSocket.listen(0)
+		dataPort = int(sys.argv[5])
+		controlSocket.bind((serverName, dataPort))
+		controlSocket.listen(1)
 		fileRequest(controlSocket, command, fileName, dataPort)
 
 	controlSocket.close()

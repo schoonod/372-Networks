@@ -28,33 +28,35 @@ def validateParameters(params):
 	# if len(params) = 5:
 
 # Start ftclient by specifying hostname/port
-def clientStart(serverName, serverPort):
+def controlConstructor(serverName, serverPort):
 	controlSocket = socket(AF_INET, SOCK_STREAM)
 	controlSocket.connect((serverName, int(serverPort)))
-	print "clientStart function finished"
 	return (controlSocket)
 
-def printDirectory(controlSocket):
-	(dataSocket, address) = controlSocket.accept()
-	directory = dataSocket.recv(2048)
-	print directory
-	dataSocket.close()
+def dataConstructor(hostName, hostPort):
+	dataSocket = socket(AF_INET, SOCK_STREAM)
+	dataSocket.bind(('localhost', dataPort))
+	dataSocket.listen(1)
 
-def receiveFile(controlSocket, fileName):
-	(dataSocket, address) = controlSocket.accept()
-	fileData = dataSocket.recv(2048)
+def printDirectory(dataSocket):
+	conn, addr = dataSocket.accept()
+	directory = conn.recv(2048)
+	print directory
+
+def receiveFile(dataSocket, fileName):
+	conn, addr = dataSocket.accept()
+	fileData = conn.recv(2048)
 	fileName = open(fileName, 'w')
 	fileName.write(fileData)
-	dataSocket.close()
 	
-def dirRequest(controlSocket, command, dataPort):
+def dirRequest(controlSocket, dataSocket, command, dataPort):
 	controlSocket.send(("%s %s") % (command, dataPort))
-	printDirectory(controlSocket)
+	printDirectory(dataSocket)
 
 # Make request to host for file directory or file
-def fileRequest(controlSocket, command, fileName, dataPort):
+def fileRequest(controlSocket, dataSocket, command, fileName, dataPort):
 	controlSocket.send(("%s %s %s") % (command, fileName, dataPort))
-	receiveFile(controlSocket, fileName)
+	receiveFile(dataSocket, fileName)
 
 	
 if __name__ == '__main__':
@@ -69,27 +71,25 @@ if __name__ == '__main__':
 	serverPort = sys.argv[2]
 	print "Serverport is " + serverPort
 
-	controlSocket = clientStart(serverName, serverPort)
-
-	print len(sys.argv)
-
-
 	command = sys.argv[3]
-	
+	print "Command is " + command
+
+	controlSocket = controlConstructor(serverName, serverPort)
+
 	if len(sys.argv) == 5:
 		dataPort = int(sys.argv[4])
-		print "Dataport is " + str(dataPort)
-		print "Dataport type is " + str(type(dataPort))
-		print type(dataPort)
-		controlSocket.bind((serverName, dataPort))
-		controlSocket.listen(1)
-		dirRequest(controlSocket, command, dataPort)
+		dataSocket = dataConstructor('localhost', dataPort)
+		dirRequest(controlSocket, dataSocket, command, dataPort)
 
 	else:
 		fileName = sys.argv[4]
 		dataPort = int(sys.argv[5])
-		controlSocket.bind((serverName, dataPort))
-		controlSocket.listen(1)
-		fileRequest(controlSocket, command, fileName, dataPort)
+		dataSocket = dataConstructor('localhost', dataPort)
+		fileRequest(controlSocket, dataSocket, command, fileName, dataPort)
 
-	controlSocket.close()
+	dataSocket.close()
+
+
+
+
+

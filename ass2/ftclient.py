@@ -86,12 +86,3 @@ if __name__ == '__main__':
 		fileRequest(controlSocket, command, fileName, dataPort)
 
 	controlSocket.close()
-
-
-
-
-
-
-
-
-

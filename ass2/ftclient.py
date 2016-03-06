@@ -33,13 +33,13 @@ def clientStart(serverName, serverPort):
 	return (controlSocket)
 
 def printDirectory(controlSocket):
-	dataSocket, address = controlSocket.accept()
+	(dataSocket, address) = controlSocket.accept()
 	directory = dataSocket.recv(2048)
 	print directory
 	dataSocket.close()
 
 def receiveFile(controlSocket, fileName):
-	dataSocket, address = controlSocket.accept()
+	(dataSocket, address) = controlSocket.accept()
 	fileData = dataSocket.recv(2048)
 	file = open(fileName, 'w')
 	file.write(fileData)
@@ -59,28 +59,28 @@ if __name__ == '__main__':
 
 	print len(sys.argv)
 	print sys.argv[0]
-	validateParameters(sys.argv[1:])
+	validateParameters(sys.argv[2:])
 
-	serverName = sys.argv[1]
+	serverName = sys.argv[2]
 	print "Servername is " + serverName
 
-	serverPort = sys.argv[2]
+	serverPort = sys.argv[3]
 	print "Serverport is " + serverPort
 
 	controlSocket = clientStart(serverName, serverPort)
 
 
-	command = sys.argv[3]
+	command = sys.argv[4]
 	
 	if len(sys.argv) == 5:
-		dataPort = sys.argv[4]
+		dataPort = sys.argv[5]
 		controlSocket.bind(('localhost', dataPort))
 		controlSocket.listen(0)
 		dirRequest(controlSocket, command, dataPort)
 
 	else:
-		fileName = sys.argv[4]
-		dataPort = sys.argv[5]
+		fileName = sys.argv[5]
+		dataPort = sys.argv[6]
 		controlSocket.bind(('localhost', dataPort))
 		controlSocket.listen(0)
 		fileRequest(controlSocket, command, fileName, dataPort)

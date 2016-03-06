@@ -59,28 +59,28 @@ if __name__ == '__main__':
 
 	print len(sys.argv)
 	print sys.argv[0]
-	validateParameters(sys.argv[2:])
+	validateParameters(sys.argv[1:])
 
-	serverName = sys.argv[2]
+	serverName = sys.argv[1]
 	print "Servername is " + serverName
 
-	serverPort = sys.argv[3]
+	serverPort = sys.argv[2]
 	print "Serverport is " + serverPort
 
 	controlSocket = clientStart(serverName, serverPort)
 
 
-	command = sys.argv[4]
+	command = sys.argv[3]
 	
 	if len(sys.argv) == 5:
-		dataPort = sys.argv[5]
+		dataPort = sys.argv[4]
 		controlSocket.bind(('localhost', dataPort))
 		controlSocket.listen(0)
 		dirRequest(controlSocket, command, dataPort)
 
 	else:
-		fileName = sys.argv[5]
-		dataPort = sys.argv[6]
+		fileName = sys.argv[4]
+		dataPort = sys.argv[5]
 		controlSocket.bind(('localhost', dataPort))
 		controlSocket.listen(0)
 		fileRequest(controlSocket, command, fileName, dataPort)

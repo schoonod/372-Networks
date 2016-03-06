@@ -58,6 +58,7 @@ int main(int argc, const char * argv[]) {
     // Setup socket
     int port = atoi(argv[1]);
     cout << "Port number " << port <<  " received." << endl;
+    
     int listeningSocket = startup(port);
     cout << "Server started" << endl;
     
@@ -67,7 +68,6 @@ int main(int argc, const char * argv[]) {
     return 0;
 };
 // -------------------------------------------------------------------------------------
-
 
 //--------------------------------------------------------------------------------------
 // MAIN FUNCTION DEFINITIONS -----------------------------------------------------------
@@ -86,6 +86,7 @@ void handleRequest(int listeningSocket, int port){
         
         // Create a socket with each client
         int ftpControlSocket = acceptConnection(listeningSocket);
+        cout << "Connection accepted success." << endl;
         
         // Receive full command string from client
         char* command = receiveCommand(ftpControlSocket);
@@ -108,10 +109,10 @@ void handleRequest(int listeningSocket, int port){
 //--------------------------------------------------------------------------------------
 // INCOMING CONNECTION HANDLER ---------------------------------------------------------
 //--------------------------------------------------------------------------------------
-int acceptConnection(int socket){
+int acceptConnection(int listeningSocket){
     // New connection socket does not need/use the peer address info so NULL, NULL
     // is used for addr and sizeof(addr)
-    int newConnectionSocket = accept(socket, (struct sockaddr*)NULL, NULL);
+    int newConnectionSocket = accept(listeningSocket, (struct sockaddr*)NULL, NULL);
     cout << "Client connected, awaiting command." << endl;
     return newConnectionSocket;
 };

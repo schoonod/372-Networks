@@ -54,7 +54,7 @@ void handleRequest(int, int);
 // MAIN --------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
 int main(int argc, const char * argv[]) {
-
+    
     // Setup socket
     int port = atoi(argv[1]);
     cout << "Port number " << port <<  " received." << endl;
@@ -65,9 +65,8 @@ int main(int argc, const char * argv[]) {
     handleRequest(listeningSocket, port);
     
     return 0;
-}
+};
 // -------------------------------------------------------------------------------------
-
 
 //--------------------------------------------------------------------------------------
 // MAIN FUNCTION DEFINITIONS -----------------------------------------------------------
@@ -78,7 +77,7 @@ int startup(int port){
     bindSocket(listeningSocket, port);
     listenSocket(listeningSocket);
     return listeningSocket;
-}
+};
 
 void handleRequest(int listeningSocket, int port){
     char list[] = "-l";
@@ -86,6 +85,7 @@ void handleRequest(int listeningSocket, int port){
         
         // Create a socket with each client
         int ftpControlSocket = acceptConnection(listeningSocket);
+        cout << "Connection accepted success." << endl;
         
         // Receive full command string from client
         char* command = receiveCommand(ftpControlSocket);
@@ -100,7 +100,7 @@ void handleRequest(int listeningSocket, int port){
         
         free((char*)command);
     }
-}
+};
 //--------------------------------------------------------------------------------------
 
 
@@ -108,10 +108,10 @@ void handleRequest(int listeningSocket, int port){
 //--------------------------------------------------------------------------------------
 // INCOMING CONNECTION HANDLER ---------------------------------------------------------
 //--------------------------------------------------------------------------------------
-int acceptConnection(int socket){
+int acceptConnection(int listeningSocket){
     // New connection socket does not need/use the peer address info so NULL, NULL
     // is used for addr and sizeof(addr)
-    int newConnectionSocket = accept(socket, (struct sockaddr*)NULL, NULL);
+    int newConnectionSocket = accept(listeningSocket, (struct sockaddr*)NULL, NULL);
     cout << "Client connected, awaiting command." << endl;
     return newConnectionSocket;
 };
@@ -129,15 +129,15 @@ char* dirFileCommand(char* command){
     
     // This gives us either -l or -g
     dirFile = strtok(str, " ");
- 
+    
     return dirFile;
-}
+};
 
 int createDataSocket(int ftpControlSocket, int ftpDataPort){
     // New data socket for FTP
     int ftpDataSocket = 0;
     
-
+    
     // Assign client IP info to Socket
     struct sockaddr_in ipInfo;
     memset(&ipInfo, '0', sizeof(ipInfo));
@@ -168,10 +168,10 @@ void listDirectory(int ftpControlSocket, char* command){
     dataport = strtok(NULL, " ");     // This gives us the dataport
     
     clientDataPort = atoi(dataport);
-
+    
     // Returns clientDataPort
     ftpDataSocket = createDataSocket(ftpControlSocket, clientDataPort);
-
+    
     while ((dEntry = readdir(directory))){
         // Send a filename
         send(ftpDataSocket, dEntry->d_name, strlen(dEntry->d_name), 0);
@@ -180,7 +180,7 @@ void listDirectory(int ftpControlSocket, char* command){
     }
     
     closedir(directory);
-           
+    
 };
 
 void transferFile(int ftpControlSocket, char* command){
@@ -264,7 +264,7 @@ void transferFile(int ftpControlSocket, char* command){
 int setSocket(){
     int listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
     return listeningSocket;
-}
+};
 
 // Bind server address info to socket
 void bindSocket(int socket, int port){
@@ -274,7 +274,7 @@ void bindSocket(int socket, int port){
     ipInfo.sin_port = htons(port);
     ipInfo.sin_addr.s_addr = htonl(INADDR_ANY);
     bind(socket, (struct sockaddr*)&ipInfo, sizeof(ipInfo));
-}
+};
 
 // Listen and open a chat socket
 void listenSocket(int socket){

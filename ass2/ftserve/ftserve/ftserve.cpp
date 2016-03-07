@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <fstream>
+#include <typeinfo>
 using namespace std;
 
 //--------------------------------------------------------------------------------------
@@ -69,48 +70,55 @@ int main(int argc, const char * argv[]) {
     while(1) {
         struct sockaddr_in ipInfo;
         memset(&ipInfo, '0', sizeof(ipInfo));
-        int controlSocket = accept(listeningSocket, (struct sockaddr *) &ipInfo, (unsigned int*)sizeof(ipInfo));
-        cout << "hi" << endl;
-        char* command = (char*)malloc(500);
-        cout << "hi2" << endl;
+        int controlSocket = accept(listeningSocket, (struct sockaddr *) NULL, NULL);
+        char command[500];
         memset(&command[0], 0, sizeof(command));
-        cout << "hi3" << endl;
-        recv(listeningSocket, command, 500, 0);
-        cout << "hi4" << endl;
-        char* str = command;
-        char* dirFile;
+        recv(controlSocket, command, 500, 0);
+        
+        char str[500];
+        strncpy(str, command, 500);
+        
+        cout << "command1 is " << command << endl;
+        char *dirFile;
+        cout << "dirFile1 is " << dirFile << endl;
+        
         dirFile = strtok(str, " ");
-        cout << dirFile << endl;
-        cout << "hi5" << endl;
+        cout << "dirFile2 is " << dirFile << endl;
+        
         // This gives us either -l or -g
         if (strcmp(dirFile,list)==0){
-            cout << "hi6" << endl;
             DIR *directory = opendir(".");
             struct dirent * dEntry;
             int clientDataPort = 0;
             int ftpDataSocket = 0;
-            char *dataport;
+            cout << "hi10" << endl;
+            cout << "command2 is " << command << endl;
             
-            dataport = strtok(command, " ");  // This gives us -l
-            dataport = strtok(NULL, " ");     // This gives us the dataport
-            clientDataPort = atoi(dataport);
+            dirFile = strtok(NULL, " ");  // This gives us -dataport
+            cout << "dirFile3 is " << dirFile << "...dataport bitches" << endl;
+            
+            clientDataPort = atoi(dirFile);
+            cout << "clientDataPort is " << clientDataPort << endl;
+            cout << "clientDataPort type is " << typeid(clientDataPort).name() << endl;
+            
             struct sockaddr_in ipInfo2;
             memset(&ipInfo2, '0', sizeof(ipInfo2));
+            cout << "hi11" << endl;
+            
             getpeername(controlSocket, (struct sockaddr *) &ipInfo2, (unsigned int*)sizeof(ipInfo2));
             ipInfo2.sin_port = htons(clientDataPort);
             ftpDataSocket = connect(ftpDataSocket, (struct sockaddr *) &ipInfo2, sizeof(ipInfo2));
             while ((dEntry = readdir(directory))){
+                cout << "directory entry is " << dEntry->d_name << endl;
                 send(ftpDataSocket, dEntry->d_name, strlen(dEntry->d_name), 0);
                 send(ftpDataSocket, "\n", 1, 0);
             }
             closedir(directory);
             
         }
-        cout << "hi7" << endl;
+        cout << "hiiiiiiii" << endl;
         
         transferFile(controlSocket, command);
-        
-        free((char*)command);
     }
     
     return 0;

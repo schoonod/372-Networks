@@ -40,11 +40,11 @@ char* receiveCommand(int);
 // Get command for listing director OR sending file
 char* dirFileCommand(char* command);
 // Return ftpDataSocket
-int createDataSocket(int ftpControlSocket, char* command);
+int createDataSocket(int controlSocket, char* command);
 // Sends requested directory listing to client
-void listDirectory(int ftpControlSocket, char* command);
+void listDirectory(int controlSocket, char* command);
 // Sends requested file to client
-void transferFile(int ftpControlSocket, char* command);
+void transferFile(int controlSocket, char* command);
 // Utilize the above
 void handleRequest(int, int);
 //--------------------------------------------------------------------------------------
@@ -57,133 +57,68 @@ int main(int argc, const char * argv[]) {
     
     // Setup socket
     int port = atoi(argv[1]);
-    cout << "Port number " << port <<  " received." << endl;
-    int listeningSocket = startup(port);
-    cout << "Server started" << endl;
-    
-    // Accept incoming connections and handle requests
-    handleRequest(listeningSocket, port);
-    
-    return 0;
-};
-// -------------------------------------------------------------------------------------
-
-//--------------------------------------------------------------------------------------
-// MAIN FUNCTION DEFINITIONS -----------------------------------------------------------
-//--------------------------------------------------------------------------------------
-int startup(int port){
-    // Create a listening Socket
-    int listeningSocket = setSocket();
-    bindSocket(listeningSocket, port);
-    listenSocket(listeningSocket);
-    return listeningSocket;
-};
-
-void handleRequest(int listeningSocket, int port){
+    int listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in ipInfo;
+    memset(&ipInfo, '0', sizeof(ipInfo));
+    ipInfo.sin_family = AF_INET;
+    ipInfo.sin_port = htons(port);
+    ipInfo.sin_addr.s_addr = htonl(INADDR_ANY);
+    bind(listeningSocket, (struct sockaddr*)&ipInfo, sizeof(ipInfo));
+    listen(listeningSocket, 10);
     char list[] = "-l";
     while(1) {
+        struct sockaddr_in ipInfo;
+        memset(&ipInfo, '0', sizeof(ipInfo));
+        int controlSocket = accept(listeningSocket, (struct sockaddr *) &ipInfo, (unsigned int*)sizeof(ipInfo));
+        cout << "hi" << endl;
+        char* command = (char*)malloc(500);
+        cout << "hi2" << endl;
+        memset(&command[0], 0, sizeof(command));
+        cout << "hi3" << endl;
+        recv(listeningSocket, command, 500, 0);
+        cout << "hi4" << endl;
+        char* str = command;
+        char* dirFile;
+        dirFile = strtok(str, " ");
+        cout << dirFile << endl;
+        cout << "hi5" << endl;
+        // This gives us either -l or -g
+        if (strcmp(dirFile,list)==0){
+            cout << "hi6" << endl;
+            DIR *directory = opendir(".");
+            struct dirent * dEntry;
+            int clientDataPort = 0;
+            int ftpDataSocket = 0;
+            char *dataport;
+            
+            dataport = strtok(command, " ");  // This gives us -l
+            dataport = strtok(NULL, " ");     // This gives us the dataport
+            clientDataPort = atoi(dataport);
+            struct sockaddr_in ipInfo2;
+            memset(&ipInfo2, '0', sizeof(ipInfo2));
+            getpeername(controlSocket, (struct sockaddr *) &ipInfo2, (unsigned int*)sizeof(ipInfo2));
+            ipInfo2.sin_port = htons(clientDataPort);
+            ftpDataSocket = connect(ftpDataSocket, (struct sockaddr *) &ipInfo2, sizeof(ipInfo2));
+            while ((dEntry = readdir(directory))){
+                send(ftpDataSocket, dEntry->d_name, strlen(dEntry->d_name), 0);
+                send(ftpDataSocket, "\n", 1, 0);
+            }
+            closedir(directory);
+            
+        }
+        cout << "hi7" << endl;
         
-        // Create a socket with each client
-        int ftpControlSocket = acceptConnection(listeningSocket);
-        cout << "Connection accepted success." << endl;
-        
-        // Receive full command string from client
-        char* command = receiveCommand(ftpControlSocket);
-        
-        char* dirFile = dirFileCommand(command);
-        
-        // Send data based on command
-        if (strcmp(dirFile,list)==0)
-            listDirectory(ftpControlSocket, command);
-        else
-            transferFile(ftpControlSocket, command);
+        transferFile(controlSocket, command);
         
         free((char*)command);
     }
-};
-//--------------------------------------------------------------------------------------
-
-
-
-//--------------------------------------------------------------------------------------
-// INCOMING CONNECTION HANDLER ---------------------------------------------------------
-//--------------------------------------------------------------------------------------
-int acceptConnection(int listeningSocket){
-    // New connection socket does not need/use the peer address info so NULL, NULL
-    // is used for addr and sizeof(addr)
-    int newConnectionSocket = accept(listeningSocket, (struct sockaddr*)NULL, NULL);
-    cout << "Client connected, awaiting command." << endl;
-    return newConnectionSocket;
-};
-
-char* receiveCommand(int listeningSocket){
-    char* newMessage = (char*)malloc(500);
-    memset(&newMessage[0], 0, sizeof(newMessage));
-    recv(listeningSocket, newMessage, 500, 0);
-    return newMessage;
-};
-
-char* dirFileCommand(char* command){
-    char* str = command;
-    char* dirFile;
     
-    // This gives us either -l or -g
-    dirFile = strtok(str, " ");
-    
-    return dirFile;
-};
-
-int createDataSocket(int ftpControlSocket, int ftpDataPort){
-    // New data socket for FTP
-    int ftpDataSocket = 0;
-    
-    
-    // Assign client IP info to Socket
-    struct sockaddr_in ipInfo;
-    memset(&ipInfo, '0', sizeof(ipInfo));
-    getpeername(ftpControlSocket, (struct sockaddr *) &ipInfo, (unsigned int*)sizeof(ipInfo));
-    
-    // Assign FTP data port to Socket
-    ipInfo.sin_port = htons(ftpDataPort);
-    
-    // Connect data Socket to client
-    connect(ftpDataSocket, (struct sockaddr *) &ipInfo, sizeof(ipInfo));
-    
-    // Return connected Socket
-    return ftpDataSocket;
+    return 0;
 };
 
 
-void listDirectory(int ftpControlSocket, char* command){
-    // http://stackoverflow.com/questions/30516546/how-are-dirent-entries-ordered
-    DIR *directory = opendir(".");
-    struct dirent * dEntry;
-    int clientDataPort = 0;
-    int ftpDataSocket = 0;
-    
-    
-    char *dataport;
-    
-    dataport = strtok(command, " ");  // This gives us -l
-    dataport = strtok(NULL, " ");     // This gives us the dataport
-    
-    clientDataPort = atoi(dataport);
-    
-    // Returns clientDataPort
-    ftpDataSocket = createDataSocket(ftpControlSocket, clientDataPort);
-    
-    while ((dEntry = readdir(directory))){
-        // Send a filename
-        send(ftpDataSocket, dEntry->d_name, strlen(dEntry->d_name), 0);
-        // Send a new line
-        send(ftpDataSocket, "\n", 1, 0);
-    }
-    
-    closedir(directory);
-    
-};
 
-void transferFile(int ftpControlSocket, char* command){
+void transferFile(int controlSocket, char* command){
     int clientDataPort = 0;
     int ftpDataSocket = 0;
     
@@ -206,7 +141,7 @@ void transferFile(int ftpControlSocket, char* command){
     clientDataPort = atoi(dataport);
     
     // Returns clientDataPort
-    ftpDataSocket = createDataSocket(ftpControlSocket, clientDataPort);
+    //    ftpDataSocket = createDataSocket(controlSocket, clientDataPort);
     
     
     // TRANSFER FILE
@@ -252,33 +187,5 @@ void transferFile(int ftpControlSocket, char* command){
     fclose (pFile);
     free (buffer);
     close(ftpDataSocket);
-};
-// -------------------------------------------------------------------------------------
-
-
-
-//--------------------------------------------------------------------------------------
-// OPEN SOCKET -------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------
-// Create Socket
-int setSocket(){
-    int listeningSocket = socket(AF_INET, SOCK_STREAM, 0);
-    return listeningSocket;
-};
-
-// Bind server address info to socket
-void bindSocket(int socket, int port){
-    struct sockaddr_in ipInfo;
-    memset(&ipInfo, '0', sizeof(ipInfo));
-    ipInfo.sin_family = AF_INET;
-    ipInfo.sin_port = htons(port);
-    ipInfo.sin_addr.s_addr = htonl(INADDR_ANY);
-    bind(socket, (struct sockaddr*)&ipInfo, sizeof(ipInfo));
-};
-
-// Listen and open a chat socket
-void listenSocket(int socket){
-    listen(socket, 1);
-    cout << "Server is listening" << endl;
 };
 // -------------------------------------------------------------------------------------

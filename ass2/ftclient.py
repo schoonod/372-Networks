@@ -30,12 +30,7 @@ def validateParameters(params):
 # Start ftclient by specifying hostname/port
 def controlConstructor(serverName, serverPort):
 	controlSocket = socket(AF_INET, SOCK_STREAM)
-	print serverName
-	print serverPort
-	try:
-		controlSocket.connect((serverName, int(serverPort)))
-	except socket.error:
-		print "Connection error"
+	controlSocket.connect((serverName, serverPort))
 	return controlSocket
 
 def dataConstructor(hostName, hostPort):
@@ -47,7 +42,6 @@ def dataConstructor(hostName, hostPort):
 def printDirectory(dataSocket):
 	print "waiting1?"
 	conn, addr = dataSocket.accept()
-	print "waiting2?"
 	directory = conn.recv(2048)
 	print directory
 
@@ -68,19 +62,14 @@ def fileRequest(controlSocket, dataSocket, command, fileName, dataPort):
 
 	
 if __name__ == '__main__':
-
-	print len(sys.argv)
-	print sys.argv[0]
 	validateParameters(sys.argv[1:])
 
 	serverName = sys.argv[1]
-	print "Servername is " + serverName
 
 	serverPort = sys.argv[2]
-	print "Serverport is " + serverPort
+	serverPort = int(serverPort)	
 
 	command = sys.argv[3]
-	print "Command is " + command
 
 	controlSocket = controlConstructor(serverName, serverPort)
 
